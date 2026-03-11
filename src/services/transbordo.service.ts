@@ -28,7 +28,7 @@ export const transbordoMigration = async (tenantId: string, origin: MigrationSch
 const migrateQueuesAndPriorities = async (tenantId: string, destiny: MigrationSchema, queues: BlipFormattedResponse, priorities: BlipFormattedResponse) => {
     const { httpKey, transbordoId } = destiny;
 
-    const queuesWithPriorities = createQueueObject(queues.items, priorities.items);
+    const queuesWithPriorities = addPriorityToQueueObject(queues.items, priorities.items);
 
     let result: any = {
         queues: {
@@ -81,7 +81,7 @@ const migrateQueuesAndPriorities = async (tenantId: string, destiny: MigrationSc
     return result;
 };
 
-const createQueueObject = (queues: Array<Queue>, priorities: Array<Priority>) => {
+const addPriorityToQueueObject = (queues: Array<Queue>, priorities: Array<Priority>) => {
     return queues.map(queue => {
         priorities.forEach(priority => {
             if (priority.queueId == queue.id) queue["priorityObject"] = priority;
