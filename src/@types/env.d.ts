@@ -9,5 +9,5 @@ declare namespace NodeJS {
 export interface Env {
     PORT: number;
     BLIP_ROUTER_COMMAND_URL: string;
-    BLIP_ROUTER_AUTH_KEY: string
+    BLIP_ROUTER_AUTH_KEY: string;
 }
