@@ -1,4 +1,4 @@
-import { getContact, upsertContact } from "../clients/blipApiClient";
+import { getContact, upsertContact } from "../clients/blip/contacts.requests";
 import { ContactSchema } from "../schemas/contacts.schema";
 
 export const checkIfContactsExists = async (identity: string) => {

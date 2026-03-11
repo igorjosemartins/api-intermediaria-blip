@@ -1,6 +1,6 @@
-import blip from "./axios.service";
-import { ContactSchema } from "../schemas/contacts.schema";
-import { handleAxiosError } from "../utils/axios-error.util";
+import { routerRequest as blip } from "../axios.service";
+import { ContactSchema } from "../../schemas/contacts.schema";
+import { handleAxiosError } from "../../utils/axios-error.util";
 
 export const getContact = async (identity: string) => {
     try {
@@ -37,7 +37,7 @@ export const upsertContact = async (method: "set" | "merge", identity: string, c
         const { data } = await blip.post("", requestBody);
 
         return data;
-        
+
     } catch (e) {
         handleAxiosError(e);
     }
