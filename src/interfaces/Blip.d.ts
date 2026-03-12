@@ -3,6 +3,7 @@ import { Queue } from "./Queue";
 import { Attendant } from "./Attendant";
 import { Rule } from "./Rule";
 import { Priority } from "./Priority";
+import { Category, CustomReply } from "./CustomReply";
 
 export interface BlipDefaultResponse {
     type?: string;
@@ -55,6 +56,16 @@ export interface BlipGetAttendantsResponse {
 export interface BlipGetTagsResponse {
     status: "success" | "failure" | "not found";
     items: Array<string>;
+}
+
+export interface BlipGetCustomRepliesResponse {
+    status: "success" | "failure" | "not found";
+    items: Array<CustomReply>;
+}
+
+export interface BlipGetCustomReplyCategoryResponse {
+    status: "success" | "failure" | "not found";
+    items: Array<Category>;
 }
 
 export interface Condition {

@@ -3,8 +3,10 @@ import { handleAxiosError } from "../../utils/axios-error.util";
 import { Queue } from "../../interfaces/Queue";
 import { Rule } from "../../interfaces/Rule";
 import { Priority } from "../../interfaces/Priority";
-import { BlipCreateQueueResponse, BlipDefaultResponse, BlipGetAttendantsResponse, BlipGetPrioritiesResponse, BlipGetQueuesResponse, BlipGetRulesResponse, BlipGetTagsResponse } from "../../interfaces/Blip";
+import { BlipCreateQueueResponse, BlipDefaultResponse, BlipGetAttendantsResponse, BlipGetCustomRepliesResponse, BlipGetCustomReplyCategoryResponse, BlipGetPrioritiesResponse, BlipGetQueuesResponse, BlipGetRulesResponse, BlipGetTagsResponse } from "../../interfaces/Blip";
 import { Attendant } from "../../interfaces/Attendant";
+import { UUID } from "crypto";
+import { Category } from "../../interfaces/CustomReply";
 
 export const getAttendanceQueues = async (tenantId: string, authKey: string): Promise<BlipGetQueuesResponse> => {
     try {
@@ -244,6 +246,91 @@ export const getTags = async (tenantId: string, authKey: string): Promise<BlipGe
             status: data.status,
             items: (data.resource && data.resource.items.length > 0) ? data.resource.items.map((tag: string) => tag.trim()) : []
         };
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
+
+export const getCustomReplies = async (tenantId: string, authKey: string): Promise<BlipGetCustomRepliesResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "get",
+            uri: "/replies"
+        };
+
+        const { data } = await blip.post("", requestBody);
+
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+
+        return {
+            status: data.status,
+            items: (data.resource && data.resource.items.length > 0) ? data.resource.items : []
+        };
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
+
+export const getCustomReplyCategory = async (tenantId: string, authKey: string, categoryId: UUID): Promise<BlipGetCustomReplyCategoryResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "get",
+            uri: `/replies/${categoryId}`
+        };
+
+        const { data } = await blip.post("", requestBody);
+
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+
+        return {
+            status: data.status,
+            items: (data.resource && data.resource.items.length > 0) ? data.resource.items : []
+        };
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
+
+export const createCustomReplyCategory = async (tenantId: string, authKey: string, categoryObject: Category): Promise<BlipDefaultResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+        const { category, name, document, type, isDynamicContent } = categoryObject;
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "set",
+            uri: `/replies/${crypto.randomUUID()}`,
+            type: "application/vnd.lime.collection+json",
+            resource: {
+                itemType: "application/vnd.iris.desk.custom-reply+json",
+                items: [
+                    {
+                        id: crypto.randomUUID(),
+                        category,
+                        document,
+                        isDynamicContent,
+                        name,
+                        type
+                    }
+                ]
+            }
+        };
+
+        const { data } = await blip.post("", requestBody);
+        
+        return data;
 
     } catch (e) {
         handleAxiosError(e);
