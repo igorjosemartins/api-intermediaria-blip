@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { migrateTransbordoSchema } from "../schemas/transbordo.schema";
-import { transbordoMigration } from "../services/transbordo.service";
+import { attendantsMigration, transbordoMigration } from "../services/transbordo.service";
 
 export const migrateTransbordo = async (req: FastifyRequest, reply: FastifyReply) => {
   const zodResult = migrateTransbordoSchema.safeParse(req.body);
@@ -14,6 +14,25 @@ export const migrateTransbordo = async (req: FastifyRequest, reply: FastifyReply
 
   try {
     const results = await transbordoMigration(tenantId, origin, destiny);
+    
+    return reply.status(200).send(results);
+
+  } catch (e) {
+    return reply.status(500).send({ error: (e as Error).message });
+  }
+};
+
+export const migrateAttendants = async (req: FastifyRequest, reply: FastifyReply) => {
+  const zodResult = migrateTransbordoSchema.safeParse(req.body);
+
+  if (!zodResult.success) {
+    return reply.status(400).send({ error: z.prettifyError(zodResult.error) });
+  }
+
+  const { tenantId, origin, destiny } = zodResult.data;
+
+  try {
+    const results = await attendantsMigration(tenantId, origin, destiny);
     
     return reply.status(200).send(results);
 
