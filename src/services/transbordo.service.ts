@@ -122,7 +122,7 @@ const migrateQueuesAndPriorities = async (tenantId: string, destiny: MigrationSc
             }
 
             result["priorities"]["success"] += 1;
-            result["priorities"]["createdPriorities"].push({ status: priorityData.status, priority: queue.priorityObject });
+            result["priorities"]["createdPriorities"].push({ priority: queue.priorityObject });
         }
     }
 
@@ -153,7 +153,7 @@ const migrateRules = async (tenantId: string, destiny: MigrationSchema, rules: B
         }
 
         result["rules"]["success"] += 1;
-        result["rules"]["createdRules"].push({ status: ruleData.status, rule });
+        result["rules"]["createdRules"].push({ rule });
     }
 
     return result;
@@ -192,7 +192,7 @@ const migrateAttendants = async (tenantId: string, destiny: MigrationSchema, ori
         }
 
         result["attendants"]["success"] += 1;
-        result["attendants"]["createdAttendants"].push({ status: attendantData.status, attendant });
+        result["attendants"]["createdAttendants"].push({ attendant });
     }
 
     for (const attendant of registered) {
@@ -205,7 +205,7 @@ const migrateAttendants = async (tenantId: string, destiny: MigrationSchema, ori
         }
 
         result["attendants"]["success"] += 1;
-        result["attendants"]["updatedAttendants"].push({ status: attendantData.status, attendant });
+        result["attendants"]["updatedAttendants"].push({ attendant });
     }
 
     return result;
@@ -291,7 +291,7 @@ const migrateCustomReplies = async (tenantId: string, origin: MigrationSchema, d
             }
 
             categoryResult["success"] += 1;
-            categoryResult["createdCategories"].push({ status: createdCategory.status, category });
+            categoryResult["createdCategories"].push({ category });
         }
 
         if (categoryResult.success > 0) {
