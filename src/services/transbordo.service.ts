@@ -1,34 +1,52 @@
-import { Priority } from "../interfaces/Priority";
-import { Queue } from "../interfaces/Queue";
 import { MigrationSchema } from "../schemas/transbordo.schema";
 import {
     createAttendancePriority,
     createAttendanceQueue,
     createAttendanceRule,
+    createNewAttendant,
     getAttendancePriorities,
     getAttendanceQueues,
-    getAttendanceRules
+    getAttendanceRules,
+    getAttendants
 } from "../clients/blip/transbordo.requests";
-import { BlipFormattedResponse } from "../interfaces/Blip";
+import { BlipGetAttendantsResponse, BlipGetPrioritiesResponse, BlipGetQueuesResponse, BlipGetRulesResponse } from "../interfaces/Blip";
+import { Attendant } from "../interfaces/Attendant";
 
 export const transbordoMigration = async (tenantId: string, origin: MigrationSchema, destiny: MigrationSchema) => {
     const originQueues = await getAttendanceQueues(tenantId, origin.httpKey);
     const originPriorities = await getAttendancePriorities(tenantId, origin.httpKey);
     const originRules = await getAttendanceRules(tenantId, origin.httpKey);
+    const originAttendants = await getAttendants(tenantId, origin.httpKey);
 
     const queueAndPriorityMigrationResult = await migrateQueuesAndPriorities(tenantId, destiny, originQueues, originPriorities);
     const ruleMigrationResult = await migrateRules(tenantId, destiny, originRules);
+    const attendantMigrationResult = await migrateAttendants(tenantId, destiny, originAttendants);
 
     return {
         ...queueAndPriorityMigrationResult,
-        ...ruleMigrationResult
+        ...ruleMigrationResult,
+        ...attendantMigrationResult
     };
 };
 
-const migrateQueuesAndPriorities = async (tenantId: string, destiny: MigrationSchema, queues: BlipFormattedResponse, priorities: BlipFormattedResponse) => {
+export const attendantsMigration = async (tenantId: string, origin: MigrationSchema, destiny: MigrationSchema) => {
+    const originAttendants = await getAttendants(tenantId, origin.httpKey);
+
+    const attendantMigrationResult = await migrateAttendants(tenantId, destiny, originAttendants);
+
+    return attendantMigrationResult;
+};
+
+const migrateQueuesAndPriorities = async (tenantId: string, destiny: MigrationSchema, queues: BlipGetQueuesResponse, priorities: BlipGetPrioritiesResponse) => {
     const { httpKey, transbordoId } = destiny;
 
-    const queuesWithPriorities = addPriorityToQueueObject(queues.items, priorities.items);
+    const queuesWithPriorities = queues.items.map(queue => {
+        priorities.items.forEach(priority => {
+            if (priority.queueId == queue.id) queue["priorityObject"] = priority;
+        });
+
+        return queue;
+    });
 
     let result: any = {
         queues: {
@@ -69,7 +87,6 @@ const migrateQueuesAndPriorities = async (tenantId: string, destiny: MigrationSc
             if (priorityData.status != "success") {
                 result["priorities"]["failure"] += 1;
                 result["priorities"]["failedCreations"].push({ status: priorityData.status, priority: queue.priorityObject });
-
                 continue;
             }
 
@@ -81,17 +98,7 @@ const migrateQueuesAndPriorities = async (tenantId: string, destiny: MigrationSc
     return result;
 };
 
-const addPriorityToQueueObject = (queues: Array<Queue>, priorities: Array<Priority>) => {
-    return queues.map(queue => {
-        priorities.forEach(priority => {
-            if (priority.queueId == queue.id) queue["priorityObject"] = priority;
-        });
-
-        return queue;
-    });
-};
-
-const migrateRules = async (tenantId: string, destiny: MigrationSchema, rules: BlipFormattedResponse) => {
+const migrateRules = async (tenantId: string, destiny: MigrationSchema, rules: BlipGetRulesResponse) => {
     const { httpKey } = destiny;
 
     let result: any = {
@@ -119,4 +126,92 @@ const migrateRules = async (tenantId: string, destiny: MigrationSchema, rules: B
     }
 
     return result;
+};
+
+const migrateAttendants = async (tenantId: string, destiny: MigrationSchema, originAttendants: BlipGetAttendantsResponse) => {
+    const { httpKey } = destiny;
+
+    const destinyAttendants = await getAttendants(tenantId, httpKey);
+
+    const { missing, registered } = getMissingAndRegisteredAttendants(originAttendants.items, destinyAttendants.items);
+
+    let result: any = {
+        attendants: {
+            blipOriginStatus: originAttendants.status,
+            blipDestinyStatus: destinyAttendants.status,
+            total: missing.length + registered.length,
+            totalMissing: missing.length,
+            totalRegistered: registered.length,
+            success: 0,
+            failure: 0,
+            createdAttendants: [],
+            updatedAttendants: [],
+            failedCreations: [],
+            failedUpdates: []
+        }
+    };
+
+    for (const attendant of missing) {
+        const attendantData = await createNewAttendant(tenantId, httpKey, attendant);
+
+        if (attendantData.status != "success") {
+            result["attendants"]["failure"] += 1;
+            result["attendants"]["failedCreations"].push({ status: attendantData.status, attendant });
+            continue;
+        }
+
+        result["attendants"]["success"] += 1;
+        result["attendants"]["createdAttendants"].push({ status: attendantData.status, attendant });
+    }
+
+    for (const attendant of registered) {
+        const attendantData = await createNewAttendant(tenantId, httpKey, attendant);
+
+        if (attendantData.status != "success") {
+            result["attendants"]["failure"] += 1;
+            result["attendants"]["failedUpdates"].push({ status: attendantData.status, attendant });
+            continue;
+        }
+
+        result["attendants"]["success"] += 1;
+        result["attendants"]["updatedAttendants"].push({ status: attendantData.status, attendant });
+    }
+
+    return result;
+};
+
+const getMissingAndRegisteredAttendants = (originAttendants: Array<Attendant>, destinyAttendants: Array<Attendant>) => {
+    const missing: Array<Attendant> = [];
+    const registered: Array<Attendant> = [];
+
+    const destinyMap = new Map(
+        destinyAttendants.map(attendant => [attendant.identity, attendant])
+    );
+
+    for (const origin of originAttendants) {
+        const destiny = destinyMap.get(origin.identity);
+        
+        // attendants that already exists in destiny
+        if (destiny) {
+            // merge origin and destiny queues
+            const teams = [...new Set([...origin.teams, ...destiny.teams])];
+
+            registered.push({
+                ...origin,
+                teams
+            });
+
+            destinyMap.delete(origin.identity);
+
+        } else {
+            missing.push(origin);
+        }
+    }
+
+    // attendants that exist in destiny but not in origin
+    for (const remaining of destinyMap.values()) {
+        missing.push(remaining);
+    }
+
+    return { missing, registered };
 };

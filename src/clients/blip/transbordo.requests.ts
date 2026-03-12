@@ -3,9 +3,10 @@ import { handleAxiosError } from "../../utils/axios-error.util";
 import { Queue } from "../../interfaces/Queue";
 import { Rule } from "../../interfaces/Rule";
 import { Priority } from "../../interfaces/Priority";
-import { BlipCreateQueueResponse, BlipDefaultResponse, BlipFormattedResponse } from "../../interfaces/Blip";
+import { BlipCreateQueueResponse, BlipDefaultResponse, BlipGetAttendantsResponse, BlipGetPrioritiesResponse, BlipGetQueuesResponse, BlipGetRulesResponse } from "../../interfaces/Blip";
+import { Attendant } from "../../interfaces/Attendant";
 
-export const getAttendanceQueues = async (tenantId: string, authKey: string): Promise<BlipFormattedResponse> => {
+export const getAttendanceQueues = async (tenantId: string, authKey: string): Promise<BlipGetQueuesResponse> => {
     try {
         const blip = transbordoRequest(tenantId, authKey);
 
@@ -18,7 +19,7 @@ export const getAttendanceQueues = async (tenantId: string, authKey: string): Pr
 
         const { data } = await blip.post("", requestBody);
 
-        if (data.reason && data.reason.description.includes("not found")) return { status: "not found", items: [] };
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
 
         return {
             status: data.status,
@@ -30,7 +31,7 @@ export const getAttendanceQueues = async (tenantId: string, authKey: string): Pr
     }
 };
 
-export const getAttendanceRules = async (tenantId: string, authKey: string): Promise<BlipFormattedResponse> => {
+export const getAttendanceRules = async (tenantId: string, authKey: string): Promise<BlipGetRulesResponse> => {
     try {
         const blip = transbordoRequest(tenantId, authKey);
 
@@ -43,7 +44,7 @@ export const getAttendanceRules = async (tenantId: string, authKey: string): Pro
 
         const { data } = await blip.post("", requestBody);
 
-        if (data.reason && data.reason.description.includes("not found")) return { status: "not found", items: [] };
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
 
         return {
             status: data.status,
@@ -55,7 +56,7 @@ export const getAttendanceRules = async (tenantId: string, authKey: string): Pro
     }
 };
 
-export const getAttendancePriorities = async (tenantId: string, authKey: string): Promise<BlipFormattedResponse> => {
+export const getAttendancePriorities = async (tenantId: string, authKey: string): Promise<BlipGetPrioritiesResponse> => {
     try {
         const blip = transbordoRequest(tenantId, authKey);
 
@@ -68,7 +69,7 @@ export const getAttendancePriorities = async (tenantId: string, authKey: string)
 
         const { data } = await blip.post("", requestBody);
 
-        if (data.reason && data.reason.description.includes("not found")) return { status: "not found", items: [] };
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
 
         return {
             status: data.status,
@@ -161,6 +162,57 @@ export const createAttendancePriority = async (tenantId: string, authKey: string
                 operator,
                 priority,
                 urgency
+            }
+        };
+
+        const { data } = await blip.post("", requestBody);
+
+        return data;
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
+
+export const getAttendants = async (tenantId: string, authKey: string): Promise<BlipGetAttendantsResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "get",
+            uri: "/attendants"
+        };
+
+        const { data } = await blip.post("", requestBody);
+
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+
+        return {
+            status: data.status,
+            items: (data.resource && data.resource.items.length > 0) ? data.resource.items : []
+        };
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
+
+export const createNewAttendant = async (tenantId: string, authKey: string, attendant: Attendant): Promise<BlipDefaultResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+        const { identity, teams } = attendant;
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "set",
+            uri: "/attendants",
+            type: "application/vnd.iris.desk.attendant+json",
+            resource: {
+                identity,
+                teams
             }
         };
 
