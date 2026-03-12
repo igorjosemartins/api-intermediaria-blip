@@ -3,7 +3,7 @@ import { handleAxiosError } from "../../utils/axios-error.util";
 import { Queue } from "../../interfaces/Queue";
 import { Rule } from "../../interfaces/Rule";
 import { Priority } from "../../interfaces/Priority";
-import { BlipCreateQueueResponse, BlipDefaultResponse, BlipGetAttendantsResponse, BlipGetPrioritiesResponse, BlipGetQueuesResponse, BlipGetRulesResponse } from "../../interfaces/Blip";
+import { BlipCreateQueueResponse, BlipDefaultResponse, BlipGetAttendantsResponse, BlipGetPrioritiesResponse, BlipGetQueuesResponse, BlipGetRulesResponse, BlipGetTagsResponse } from "../../interfaces/Blip";
 import { Attendant } from "../../interfaces/Attendant";
 
 export const getAttendanceQueues = async (tenantId: string, authKey: string): Promise<BlipGetQueuesResponse> => {
@@ -219,6 +219,31 @@ export const createNewAttendant = async (tenantId: string, authKey: string, atte
         const { data } = await blip.post("", requestBody);
 
         return data;
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
+
+export const getTags = async (tenantId: string, authKey: string): Promise<BlipGetTagsResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "get",
+            uri: "/tags/active"
+        };
+
+        const { data } = await blip.post("", requestBody);
+
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+
+        return {
+            status: data.status,
+            items: (data.resource && data.resource.items.length > 0) ? data.resource.items.map((tag: string) => tag.trim()) : []
+        };
 
     } catch (e) {
         handleAxiosError(e);

@@ -7,9 +7,10 @@ import {
     getAttendancePriorities,
     getAttendanceQueues,
     getAttendanceRules,
-    getAttendants
+    getAttendants,
+    getTags
 } from "../clients/blip/transbordo.requests";
-import { BlipGetAttendantsResponse, BlipGetPrioritiesResponse, BlipGetQueuesResponse, BlipGetRulesResponse } from "../interfaces/Blip";
+import { BlipGetAttendantsResponse, BlipGetPrioritiesResponse, BlipGetQueuesResponse, BlipGetRulesResponse, BlipGetTagsResponse } from "../interfaces/Blip";
 import { Attendant } from "../interfaces/Attendant";
 
 export const transbordoMigration = async (tenantId: string, origin: MigrationSchema, destiny: MigrationSchema) => {
@@ -21,11 +22,13 @@ export const transbordoMigration = async (tenantId: string, origin: MigrationSch
     const queueAndPriorityMigrationResult = await migrateQueuesAndPriorities(tenantId, destiny, originQueues, originPriorities);
     const ruleMigrationResult = await migrateRules(tenantId, destiny, originRules);
     const attendantMigrationResult = await migrateAttendants(tenantId, destiny, originAttendants);
+    const tagsMigrationResult = await getMissingTags(tenantId, origin, destiny);
 
     return {
         ...queueAndPriorityMigrationResult,
         ...ruleMigrationResult,
-        ...attendantMigrationResult
+        ...attendantMigrationResult,
+        ...tagsMigrationResult
     };
 };
 
@@ -35,6 +38,24 @@ export const attendantsMigration = async (tenantId: string, origin: MigrationSch
     const attendantMigrationResult = await migrateAttendants(tenantId, destiny, originAttendants);
 
     return attendantMigrationResult;
+};
+
+export const getMissingTags = async (tenantId: string, origin: MigrationSchema, destiny: MigrationSchema) => {
+    const originTags = await getTags(tenantId, origin.httpKey);
+    const destinyTags = await getTags(tenantId, destiny.httpKey);
+
+    const missingArray = originTags.items.filter(tag => !destinyTags.items.includes(tag));
+
+    let result: any = {
+        tags: {
+            blipOriginStatus: originTags.status,
+            blipDestinyStatus: destinyTags.status,
+            missingText: missingArray.join(", "),
+            missingArray
+        }
+    };
+
+    return result;
 };
 
 const migrateQueuesAndPriorities = async (tenantId: string, destiny: MigrationSchema, queues: BlipGetQueuesResponse, priorities: BlipGetPrioritiesResponse) => {

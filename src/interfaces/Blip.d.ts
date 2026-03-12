@@ -52,6 +52,11 @@ export interface BlipGetAttendantsResponse {
     items: Array<Attendant>;
 }
 
+export interface BlipGetTagsResponse {
+    status: "success" | "failure" | "not found";
+    items: Array<string>;
+}
+
 export interface Condition {
     property: string;
     relation: "Equals" | "Contains";
