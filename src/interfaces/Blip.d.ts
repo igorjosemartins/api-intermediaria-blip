@@ -1,21 +1,8 @@
 import { UUID } from "crypto";
-
-export interface BlipFormattedResponse {
-    status: "success" | "failure" | "not found";
-    items: Array<any>;
-}
-
-export interface BlipCreateQueueResponse {
-    resource: {
-        id: UUID,
-        ownerIdentity: string,
-        name: string,
-        isActive: boolean,
-        storageDate: string,
-        Priority: number;
-    };
-    status: string;
-}
+import { Queue } from "./Queue";
+import { Attendant } from "./Attendant";
+import { Rule } from "./Rule";
+import { Priority } from "./Priority";
 
 export interface BlipDefaultResponse {
     type?: string;
@@ -33,9 +20,42 @@ export interface BlipDefaultResponse {
     id: string;
     from: string;
     to: string;
-    metadata: {
+    metadata?: {
         traceparent?: string;
         "#command.uri"?: string;
         "#metrics.custom.label"?: string;
     };
 }
+
+export interface BlipCreateQueueResponse {
+    status: "success" | "failure";
+    resource: Queue;
+}
+
+export interface BlipGetQueuesResponse {
+    status: "success" | "failure" | "not found";
+    items: Array<Queue>;
+}
+
+export interface BlipGetRulesResponse {
+    status: "success" | "failure" | "not found";
+    items: Array<Rule>;
+}
+
+export interface BlipGetPrioritiesResponse {
+    status: "success" | "failure" | "not found";
+    items: Array<Priority>;
+}
+
+export interface BlipGetAttendantsResponse {
+    status: "success" | "failure" | "not found";
+    items: Array<Attendant>;
+}
+
+export interface Condition {
+    property: string;
+    relation: "Equals" | "Contains";
+    values: Array<string>;
+}
+
+export type Operator = "Or" | "And";

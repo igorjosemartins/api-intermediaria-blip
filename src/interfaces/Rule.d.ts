@@ -1,5 +1,6 @@
 import { UUID } from "crypto";
 import { PriorityNumber } from "./Priority";
+import { Condition, Operator } from "./Blip";
 
 export interface Rule {
     id: UUID;
@@ -14,11 +15,3 @@ export interface Rule {
     storageDate: string;
     queueId: UUID;
 }
-
-interface Condition {
-    property: string;
-    relation: "Equals" | "Contains";
-    values: Array<string>;
-}
-
-export type Operator = "Or" | "And";

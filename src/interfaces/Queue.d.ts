@@ -8,12 +8,6 @@ export interface Queue {
     isActive: boolean;
     storageDate: string;
     Priority: PriorityNumber;
-    uniqueId: UUID;
+    uniqueId?: UUID;
     priorityObject?: Priority;
-}
-
-interface Condition {
-    property: string;
-    relation: "Equals" | "Contains";
-    values: Array<string>;
 }

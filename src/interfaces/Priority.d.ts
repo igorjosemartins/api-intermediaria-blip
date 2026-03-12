@@ -1,4 +1,4 @@
-import { Operator } from "./Rule";
+import { Condition, Operator } from "./Blip";
 
 export interface Priority {
     id: string;
