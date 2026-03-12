@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const transbordoAuthSchema = z.object({
+export const transbordoAuthSchema = z.object({
     tenantId: z.string(),
     httpKey: z.string(),
     transbordoId: z.string()

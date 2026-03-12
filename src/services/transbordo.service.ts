@@ -5,6 +5,11 @@ import {
     createAttendanceRule,
     createCustomReplyCategory,
     createNewAttendant,
+    deleteAttendanceQueue,
+    deleteAttendanceRule,
+    deleteAttendant,
+    deleteAttendantePriority,
+    deleteCustomReply,
     getAttendancePriorities,
     getAttendanceQueues,
     getAttendanceRules,
@@ -25,7 +30,7 @@ export const transbordoMigration = async (origin: TransbordoAuthSchema, destiny:
     const queueAndPriorityMigrationResult = await migrateQueuesAndPriorities(destiny, originQueues, originPriorities);
     const ruleMigrationResult = await migrateRules(destiny, originRules);
     const attendantMigrationResult = await migrateAttendants(destiny, originAttendants);
-    
+
     const tagsMigrationResult = await getMissingTags(origin, destiny);
     const repliesMigrationResult = await migrateCustomReplies(origin, destiny);
 
@@ -122,7 +127,7 @@ const migrateQueuesAndPriorities = async (destiny: TransbordoAuthSchema, queues:
             }
 
             result["priorities"]["success"] += 1;
-            result["priorities"]["createdPriorities"].push({ priority: queue.priorityObject });
+            result["priorities"]["createdPriorities"].push(queue.priorityObject);
         }
     }
 
@@ -153,7 +158,7 @@ const migrateRules = async (destiny: TransbordoAuthSchema, rules: BlipGetRulesRe
         }
 
         result["rules"]["success"] += 1;
-        result["rules"]["createdRules"].push({ rule });
+        result["rules"]["createdRules"].push(rule);
     }
 
     return result;
@@ -192,7 +197,7 @@ const migrateAttendants = async (destiny: TransbordoAuthSchema, originAttendants
         }
 
         result["attendants"]["success"] += 1;
-        result["attendants"]["createdAttendants"].push({ attendant });
+        result["attendants"]["createdAttendants"].push(attendant);
     }
 
     for (const attendant of registered) {
@@ -205,7 +210,7 @@ const migrateAttendants = async (destiny: TransbordoAuthSchema, originAttendants
         }
 
         result["attendants"]["success"] += 1;
-        result["attendants"]["updatedAttendants"].push({ attendant });
+        result["attendants"]["updatedAttendants"].push(attendant);
     }
 
     return result;
@@ -221,7 +226,7 @@ const getMissingAndRegisteredAttendants = (originAttendants: Array<Attendant>, d
 
     for (const origin of originAttendants) {
         const destiny = destinyMap.get(origin.identity);
-        
+
         // attendants that already exists in destiny
         if (destiny) {
             // merge origin and destiny queues
@@ -291,7 +296,7 @@ const migrateCustomReplies = async (origin: TransbordoAuthSchema, destiny: Trans
             }
 
             categoryResult["success"] += 1;
-            categoryResult["createdCategories"].push({ category });
+            categoryResult["createdCategories"].push(category);
         }
 
         if (categoryResult.success > 0) {
@@ -304,6 +309,174 @@ const migrateCustomReplies = async (origin: TransbordoAuthSchema, destiny: Trans
         }
 
         result["categories"][reply.category] = categoryResult;
+    }
+
+    return result;
+};
+
+export const transbordoDeletion = async (tenantId: string, httpKey: string) => {
+    const attendantsDeleteResult = await deleteAttendants(tenantId, httpKey);
+    const prioritiesDeleteResult = await deletePriorities(tenantId, httpKey);
+    const rulesDeleteResult = await deleteRules(tenantId, httpKey);
+    const queuesDeleteResult = await deleteQueues(tenantId, httpKey);
+    const repliesDeleteResult = await deleteReplies(tenantId, httpKey);
+
+    return {
+        ...attendantsDeleteResult,
+        ...prioritiesDeleteResult,
+        ...rulesDeleteResult,
+        ...queuesDeleteResult,
+        ...repliesDeleteResult
+    };
+};
+
+const deleteAttendants = async (tenantId: string, httpKey: string) => {
+    const attendants = await getAttendants(tenantId, httpKey);
+
+    let result: any = {
+        attendants: {
+            blipStatus: attendants.status,
+            total: attendants.items.length,
+            success: 0,
+            failure: 0,
+            deletedAttendants: [],
+            failedDeletes: []
+        }
+    };
+
+    for (const attendant of attendants.items) {
+        const deleteData = await deleteAttendant(tenantId, httpKey, attendant.identity);
+
+        if (deleteData.status != "success") {
+            result["attendants"]["failure"] += 1;
+            result["attendants"]["failedDeletes"].push({ status: deleteData.status, attendant });
+            continue;
+        }
+
+        result["attendants"]["success"] += 1;
+        result["attendants"]["deletedAttendants"].push(attendant);
+    }
+
+    return result;
+};
+
+const deletePriorities = async (tenantId: string, httpKey: string) => {
+    const priorities = await getAttendancePriorities(tenantId, httpKey);
+
+    let result: any = {
+        priorities: {
+            blipStatus: priorities.status,
+            total: priorities.items.length,
+            success: 0,
+            failure: 0,
+            deletedPriorities: [],
+            failedDeletes: []
+        }
+    };
+
+    for (const priority of priorities.items) {
+        const deleteData = await deleteAttendantePriority(tenantId, httpKey, priority.id);
+
+        if (deleteData.status != "success") {
+            result["priorities"]["failure"] += 1;
+            result["priorities"]["failedDeletes"].push({ status: deleteData.status, priority });
+            continue;
+        }
+
+        result["priorities"]["success"] += 1;
+        result["priorities"]["deletedPriorities"].push(priority);
+    }
+
+    return result;
+};
+
+const deleteRules = async (tenantId: string, httpKey: string) => {
+    const rules = await getAttendanceRules(tenantId, httpKey);
+
+    let result: any = {
+        rules: {
+            blipStatus: rules.status,
+            total: rules.items.length,
+            success: 0,
+            failure: 0,
+            deletedRules: [],
+            failedDeletes: []
+        }
+    };
+
+    for (const rule of rules.items) {
+        const deleteData = await deleteAttendanceRule(tenantId, httpKey, rule.id);
+
+        if (deleteData.status != "success") {
+            result["rules"]["failure"] += 1;
+            result["rules"]["failedDeletes"].push({ status: deleteData.status, rule });
+            continue;
+        }
+
+        result["rules"]["success"] += 1;
+        result["rules"]["deletedRules"].push(rule);
+    }
+
+    return result;
+};
+
+const deleteQueues = async (tenantId: string, httpKey: string) => {
+    const queues = await getAttendanceQueues(tenantId, httpKey);
+
+    let result: any = {
+        queues: {
+            blipStatus: queues.status,
+            total: queues.items.length,
+            success: 0,
+            failure: 0,
+            deletedQueues: [],
+            failedDeletes: []
+        }
+    };
+
+    for (const queue of queues.items) {
+        if (queue.name == "Default") continue;
+        
+        const deleteData = await deleteAttendanceQueue(tenantId, httpKey, queue.id);
+
+        if (deleteData.status != "success") {
+            result["queues"]["failure"] += 1;
+            result["queues"]["failedDeletes"].push({ status: deleteData.status, queue });
+            continue;
+        }
+
+        result["queues"]["success"] += 1;
+        result["queues"]["deletedQueues"].push(queue);
+    }
+
+    return result;
+};
+
+const deleteReplies = async (tenantId: string, httpKey: string) => {
+    const replies = await getCustomReplies(tenantId, httpKey);
+
+    let result: any = {
+        replies: {
+            blipStatus: replies.status,
+            total: replies.items.length,
+            success: 0,
+            failure: 0,
+            deletedReplies: [],
+            failedDeletes: []
+        }
+    };
+
+    for (const reply of replies.items) {
+        const deleteData = await deleteCustomReply(tenantId, httpKey, reply.id);
+
+        if (deleteData.status != "success") {
+            result["replies"]["failure"] += 1;
+            result["replies"]["failedDeletes"].push({ status: deleteData.status, reply });
+            continue;
+        }
+
+        result["replies"]["success"] += 1;
+        result["replies"]["deletedReplies"].push(reply);
     }
 
     return result;

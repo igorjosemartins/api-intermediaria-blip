@@ -336,3 +336,105 @@ export const createCustomReplyCategory = async (tenantId: string, authKey: strin
         handleAxiosError(e);
     }
 };
+
+export const deleteAttendant = async (tenantId: string, authKey: string, identity: string): Promise<BlipDefaultResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+
+        const formattedIdentity = identity.replace("%40", "%2540");
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "delete",
+            uri: `/attendants/${formattedIdentity}`
+        };
+
+        const { data } = await blip.post("", requestBody);
+        
+        return data;
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
+
+export const deleteAttendantePriority = async (tenantId: string, authKey: string, priorityId: UUID): Promise<BlipDefaultResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "delete",
+            uri: `/priority-rules/${priorityId}`
+        };
+
+        const { data } = await blip.post("", requestBody);
+        
+        return data;
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
+
+export const deleteAttendanceRule = async (tenantId: string, authKey: string, ruleId: UUID): Promise<BlipDefaultResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "delete",
+            uri: `/rules/${ruleId}`
+        };
+
+        const { data } = await blip.post("", requestBody);
+        
+        return data;
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
+
+export const deleteAttendanceQueue = async (tenantId: string, authKey: string, queueId: UUID): Promise<BlipDefaultResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "delete",
+            uri: `/attendance-queues/${queueId}`
+        };
+
+        const { data } = await blip.post("", requestBody);
+        
+        return data;
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
+
+export const deleteCustomReply = async (tenantId: string, authKey: string, replyId: UUID): Promise<BlipDefaultResponse> => {
+    try {
+        const blip = transbordoRequest(tenantId, authKey);
+
+        const requestBody = {
+            id: crypto.randomUUID(),
+            to: "postmaster@desk.msging.net",
+            method: "delete",
+            uri: `/replies/${replyId}`
+        };
+
+        const { data } = await blip.post("", requestBody);
+        
+        return data;
+
+    } catch (e) {
+        handleAxiosError(e);
+    }
+};
