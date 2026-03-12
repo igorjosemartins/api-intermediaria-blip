@@ -1,14 +1,14 @@
 import { z } from "zod";
 
-const migrationSchema = z.object({
+const transbordoAuthSchema = z.object({
+    tenantId: z.string(),
     httpKey: z.string(),
     transbordoId: z.string()
 });
 
-export const migrateTransbordoSchema = z.object({
-    tenantId: z.string(),
-    origin: migrationSchema,
-    destiny: migrationSchema
+export const transbordoSchema = z.object({
+    origin: transbordoAuthSchema,
+    destiny: transbordoAuthSchema
 });
 
-export type MigrationSchema = z.infer<typeof migrationSchema>;
+export type TransbordoAuthSchema = z.infer<typeof transbordoAuthSchema>;

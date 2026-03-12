@@ -1,19 +1,19 @@
 import { z } from "zod";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { migrateTransbordoSchema } from "../schemas/transbordo.schema";
+import { transbordoSchema } from "../schemas/transbordo.schema";
 import { attendantsMigration, getMissingTags, repliesMigration, transbordoMigration } from "../services/transbordo.service";
 
 export const migrateTransbordo = async (req: FastifyRequest, reply: FastifyReply) => {
-  const zodResult = migrateTransbordoSchema.safeParse(req.body);
+  const zodResult = transbordoSchema.safeParse(req.body);
 
   if (!zodResult.success) {
     return reply.status(400).send({ error: z.prettifyError(zodResult.error) });
   }
 
-  const { tenantId, origin, destiny } = zodResult.data;
+  const { origin, destiny } = zodResult.data;
 
   try {
-    const results = await transbordoMigration(tenantId, origin, destiny);
+    const results = await transbordoMigration(origin, destiny);
     
     return reply.status(200).send(results);
 
@@ -23,16 +23,16 @@ export const migrateTransbordo = async (req: FastifyRequest, reply: FastifyReply
 };
 
 export const migrateAttendants = async (req: FastifyRequest, reply: FastifyReply) => {
-  const zodResult = migrateTransbordoSchema.safeParse(req.body);
+  const zodResult = transbordoSchema.safeParse(req.body);
 
   if (!zodResult.success) {
     return reply.status(400).send({ error: z.prettifyError(zodResult.error) });
   }
 
-  const { tenantId, origin, destiny } = zodResult.data;
+  const { origin, destiny } = zodResult.data;
 
   try {
-    const results = await attendantsMigration(tenantId, origin, destiny);
+    const results = await attendantsMigration(origin, destiny);
     
     return reply.status(200).send(results);
 
@@ -42,16 +42,16 @@ export const migrateAttendants = async (req: FastifyRequest, reply: FastifyReply
 };
 
 export const migrateTags = async (req: FastifyRequest, reply: FastifyReply) => {
-  const zodResult = migrateTransbordoSchema.safeParse(req.body);
+  const zodResult = transbordoSchema.safeParse(req.body);
 
   if (!zodResult.success) {
     return reply.status(400).send({ error: z.prettifyError(zodResult.error) });
   }
 
-  const { tenantId, origin, destiny } = zodResult.data;
+  const { origin, destiny } = zodResult.data;
 
   try {
-    const results = await getMissingTags(tenantId, origin, destiny);
+    const results = await getMissingTags(origin, destiny);
     
     return reply.status(200).send(results);
 
@@ -61,16 +61,16 @@ export const migrateTags = async (req: FastifyRequest, reply: FastifyReply) => {
 };
 
 export const migrateReplies = async (req: FastifyRequest, reply: FastifyReply) => {
-  const zodResult = migrateTransbordoSchema.safeParse(req.body);
+  const zodResult = transbordoSchema.safeParse(req.body);
 
   if (!zodResult.success) {
     return reply.status(400).send({ error: z.prettifyError(zodResult.error) });
   }
 
-  const { tenantId, origin, destiny } = zodResult.data;
+  const { origin, destiny } = zodResult.data;
 
   try {
-    const results = await repliesMigration(tenantId, origin, destiny);
+    const results = await repliesMigration(origin, destiny);
     
     return reply.status(200).send(results);
 

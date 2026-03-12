@@ -1,4 +1,4 @@
-import { MigrationSchema } from "../schemas/transbordo.schema";
+import { TransbordoAuthSchema } from "../schemas/transbordo.schema";
 import {
     createAttendancePriority,
     createAttendanceQueue,
@@ -16,18 +16,18 @@ import {
 import { BlipGetAttendantsResponse, BlipGetPrioritiesResponse, BlipGetQueuesResponse, BlipGetRulesResponse } from "../interfaces/Blip";
 import { Attendant } from "../interfaces/Attendant";
 
-export const transbordoMigration = async (tenantId: string, origin: MigrationSchema, destiny: MigrationSchema) => {
-    const originQueues = await getAttendanceQueues(tenantId, origin.httpKey);
-    const originPriorities = await getAttendancePriorities(tenantId, origin.httpKey);
-    const originRules = await getAttendanceRules(tenantId, origin.httpKey);
-    const originAttendants = await getAttendants(tenantId, origin.httpKey);
+export const transbordoMigration = async (origin: TransbordoAuthSchema, destiny: TransbordoAuthSchema) => {
+    const originQueues = await getAttendanceQueues(origin.tenantId, origin.httpKey);
+    const originPriorities = await getAttendancePriorities(origin.tenantId, origin.httpKey);
+    const originRules = await getAttendanceRules(origin.tenantId, origin.httpKey);
+    const originAttendants = await getAttendants(origin.tenantId, origin.httpKey);
 
-    const queueAndPriorityMigrationResult = await migrateQueuesAndPriorities(tenantId, destiny, originQueues, originPriorities);
-    const ruleMigrationResult = await migrateRules(tenantId, destiny, originRules);
-    const attendantMigrationResult = await migrateAttendants(tenantId, destiny, originAttendants);
+    const queueAndPriorityMigrationResult = await migrateQueuesAndPriorities(destiny, originQueues, originPriorities);
+    const ruleMigrationResult = await migrateRules(destiny, originRules);
+    const attendantMigrationResult = await migrateAttendants(destiny, originAttendants);
     
-    const tagsMigrationResult = await getMissingTags(tenantId, origin, destiny);
-    const repliesMigrationResult = await migrateCustomReplies(tenantId, origin, destiny);
+    const tagsMigrationResult = await getMissingTags(origin, destiny);
+    const repliesMigrationResult = await migrateCustomReplies(origin, destiny);
 
     return {
         ...queueAndPriorityMigrationResult,
@@ -38,17 +38,17 @@ export const transbordoMigration = async (tenantId: string, origin: MigrationSch
     };
 };
 
-export const attendantsMigration = async (tenantId: string, origin: MigrationSchema, destiny: MigrationSchema) => {
-    const originAttendants = await getAttendants(tenantId, origin.httpKey);
+export const attendantsMigration = async (origin: TransbordoAuthSchema, destiny: TransbordoAuthSchema) => {
+    const originAttendants = await getAttendants(origin.tenantId, origin.httpKey);
 
-    const attendantMigrationResult = await migrateAttendants(tenantId, destiny, originAttendants);
+    const attendantMigrationResult = await migrateAttendants(destiny, originAttendants);
 
     return attendantMigrationResult;
 };
 
-export const getMissingTags = async (tenantId: string, origin: MigrationSchema, destiny: MigrationSchema) => {
-    const originTags = await getTags(tenantId, origin.httpKey);
-    const destinyTags = await getTags(tenantId, destiny.httpKey);
+export const getMissingTags = async (origin: TransbordoAuthSchema, destiny: TransbordoAuthSchema) => {
+    const originTags = await getTags(origin.tenantId, origin.httpKey);
+    const destinyTags = await getTags(destiny.tenantId, destiny.httpKey);
 
     const missingArray = originTags.items.filter(tag => !destinyTags.items.includes(tag));
 
@@ -64,12 +64,12 @@ export const getMissingTags = async (tenantId: string, origin: MigrationSchema, 
     return result;
 };
 
-export const repliesMigration = async (tenantId: string, origin: MigrationSchema, destiny: MigrationSchema) => {
-    return await migrateCustomReplies(tenantId, origin, destiny);
+export const repliesMigration = async (origin: TransbordoAuthSchema, destiny: TransbordoAuthSchema) => {
+    return await migrateCustomReplies(origin, destiny);
 };
 
-const migrateQueuesAndPriorities = async (tenantId: string, destiny: MigrationSchema, queues: BlipGetQueuesResponse, priorities: BlipGetPrioritiesResponse) => {
-    const { httpKey, transbordoId } = destiny;
+const migrateQueuesAndPriorities = async (destiny: TransbordoAuthSchema, queues: BlipGetQueuesResponse, priorities: BlipGetPrioritiesResponse) => {
+    const { tenantId, httpKey, transbordoId } = destiny;
 
     const queuesWithPriorities = queues.items.map(queue => {
         priorities.items.forEach(priority => {
@@ -129,8 +129,8 @@ const migrateQueuesAndPriorities = async (tenantId: string, destiny: MigrationSc
     return result;
 };
 
-const migrateRules = async (tenantId: string, destiny: MigrationSchema, rules: BlipGetRulesResponse) => {
-    const { httpKey } = destiny;
+const migrateRules = async (destiny: TransbordoAuthSchema, rules: BlipGetRulesResponse) => {
+    const { tenantId, httpKey } = destiny;
 
     let result: any = {
         rules: {
@@ -159,8 +159,8 @@ const migrateRules = async (tenantId: string, destiny: MigrationSchema, rules: B
     return result;
 };
 
-const migrateAttendants = async (tenantId: string, destiny: MigrationSchema, originAttendants: BlipGetAttendantsResponse) => {
-    const { httpKey } = destiny;
+const migrateAttendants = async (destiny: TransbordoAuthSchema, originAttendants: BlipGetAttendantsResponse) => {
+    const { tenantId, httpKey } = destiny;
 
     const destinyAttendants = await getAttendants(tenantId, httpKey);
 
@@ -247,8 +247,8 @@ const getMissingAndRegisteredAttendants = (originAttendants: Array<Attendant>, d
     return { missing, registered };
 };
 
-const migrateCustomReplies = async (tenantId: string, origin: MigrationSchema, destiny: MigrationSchema) => {
-    const originReplies = await getCustomReplies(tenantId, origin.httpKey);
+const migrateCustomReplies = async (origin: TransbordoAuthSchema, destiny: TransbordoAuthSchema) => {
+    const originReplies = await getCustomReplies(origin.tenantId, origin.httpKey);
 
     let result: any = {
         replies: {
@@ -270,7 +270,7 @@ const migrateCustomReplies = async (tenantId: string, origin: MigrationSchema, d
     };
 
     for (const reply of originReplies.items) {
-        const categoryData = await getCustomReplyCategory(tenantId, origin.httpKey, reply.id);
+        const categoryData = await getCustomReplyCategory(origin.tenantId, origin.httpKey, reply.id);
 
         let categoryResult: any = {
             blipStatus: categoryData.status,
@@ -282,7 +282,7 @@ const migrateCustomReplies = async (tenantId: string, origin: MigrationSchema, d
         };
 
         for (const category of categoryData.items) {
-            const createdCategory = await createCustomReplyCategory(tenantId, destiny.httpKey, category);
+            const createdCategory = await createCustomReplyCategory(destiny.tenantId, destiny.httpKey, category);
 
             if (createdCategory.status != "success") {
                 categoryResult["failure"] += 1;

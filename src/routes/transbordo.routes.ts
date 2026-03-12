@@ -11,3 +11,7 @@ async function migrationRoutes(app: FastifyInstance) {
   app.post("/tags", migrateTags);
   app.post("/replies", migrateReplies);
 }
+
+async function deleteRoutes(app: FastifyInstance) {
+  // app.delete("/transbordo");
+}
