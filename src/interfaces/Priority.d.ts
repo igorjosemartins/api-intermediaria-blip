@@ -1,7 +1,8 @@
+import { UUID } from "crypto";
 import { Condition, Operator } from "./Blip";
 
 export interface Priority {
-    id: string;
+    id: UUID;
     ownerIdentity: string;
     title: string;
     queueId: string;
