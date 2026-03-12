@@ -2,9 +2,9 @@ import axios from "axios";
 import { getEnv } from "../utils/env.util";
 
 export const routerRequest = axios.create({
-    baseURL: getEnv("BLIP_ROUTER_COMMAND_URL"),
+    baseURL: getEnv("BLIP_ROUTER_COMMANDS_URL"),
     headers: {
-        Authorization: getEnv("BLIP_ROUTER_AUTH_KEY")
+        Authorization: getEnv("BLIP_ROUTER_HTTP_KEY")
     }
 });
 
