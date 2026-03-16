@@ -302,29 +302,21 @@ export const getCustomReplyCategory = async (tenantId: string, authKey: string, 
     }
 };
 
-export const createCustomReplyCategory = async (tenantId: string, authKey: string, categoryObject: Category): Promise<BlipDefaultResponse> => {
+export const createCustomReplyCategory = async (tenantId: string, authKey: string, replyId: UUID, categoryItems: Array<Category>): Promise<BlipDefaultResponse> => {
     try {
         const blip = transbordoRequest(tenantId, authKey);
-        const { category, name, document, type, isDynamicContent } = categoryObject;
+
+        const items = categoryItems.map(category => ({ ...category, id: crypto.randomUUID() }));
 
         const requestBody = {
             id: crypto.randomUUID(),
             to: "postmaster@desk.msging.net",
             method: "set",
-            uri: `/replies/${crypto.randomUUID()}`,
+            uri: `/replies/${replyId}`,
             type: "application/vnd.lime.collection+json",
             resource: {
                 itemType: "application/vnd.iris.desk.custom-reply+json",
-                items: [
-                    {
-                        id: crypto.randomUUID(),
-                        category,
-                        document,
-                        isDynamicContent,
-                        name,
-                        type
-                    }
-                ]
+                items
             }
         };
 

@@ -261,54 +261,35 @@ const migrateCustomReplies = async (origin: TransbordoAuthSchema, destiny: Trans
             total: originReplies.items.length,
             success: 0,
             failure: 0,
-            createdReplies: [],
-            failedCreations: []
-        },
-        categories: {
-            // blipStatus: "",
-            // total: 0,
-            // success: 0,
-            // failure: 0,
-            // createdCategories: [],
-            // failedCreations: []
+            createdReplies: {},
+            failedCreations: {}
         }
     };
 
     for (const reply of originReplies.items) {
         const categoryData = await getCustomReplyCategory(origin.tenantId, origin.httpKey, reply.id);
 
+        const createdCategory = await createCustomReplyCategory(destiny.tenantId, destiny.httpKey, reply.id, categoryData.items);
+        
         let categoryResult: any = {
-            blipStatus: categoryData.status,
-            total: categoryData.items.length,
-            success: 0,
-            failure: 0,
+            blipStatus: createdCategory.status,
             createdCategories: [],
             failedCreations: []
         };
-
-        for (const category of categoryData.items) {
-            const createdCategory = await createCustomReplyCategory(destiny.tenantId, destiny.httpKey, category);
-
-            if (createdCategory.status != "success") {
-                categoryResult["failure"] += 1;
-                categoryResult["failedCreations"].push({ status: createdCategory.status, category });
-                continue;
-            }
-
-            categoryResult["success"] += 1;
-            categoryResult["createdCategories"].push(category);
-        }
-
-        if (categoryResult.success > 0) {
-            result["replies"]["success"] += 1;
-            result["replies"]["createdReplies"].push(reply.category);
-
-        } else {
+        
+        if (createdCategory.status != "success") {
+            categoryResult["failedCreations"].push(...categoryData.items);
+            
             result["replies"]["failure"] += 1;
-            result["replies"]["failedCreations"].push(reply.category);
+            result["replies"]["failedCreations"][reply.category] = categoryResult;
+            
+            continue;
         }
-
-        result["categories"][reply.category] = categoryResult;
+        
+        categoryResult["createdCategories"].push(...categoryData.items);
+        
+        result["replies"]["success"] += 1;
+        result["replies"]["createdReplies"][reply.category] = categoryResult;
     }
 
     return result;
