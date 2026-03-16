@@ -127,7 +127,7 @@ const migrateQueuesAndPriorities = async (destiny: TransbordoAuthSchema, queues:
             }
 
             result["priorities"]["success"] += 1;
-            result["priorities"]["createdPriorities"].push(queue.priorityObject);
+            result["priorities"]["createdPriorities"].push({ ...queue.priorityObject, queue: queue.name });
         }
     }
 
