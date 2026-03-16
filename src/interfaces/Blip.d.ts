@@ -29,42 +29,74 @@ export interface BlipDefaultResponse {
 }
 
 export interface BlipCreateQueueResponse {
-    status: "success" | "failure";
+    status: "success" | "failure" | "not found";
+    reason?: {
+        code: number;
+        description: string;
+    };
     resource: Queue;
 }
 
 export interface BlipGetQueuesResponse {
     status: "success" | "failure" | "not found";
+    reason?: {
+        code: number;
+        description: string;
+    };
     items: Array<Queue>;
 }
 
 export interface BlipGetRulesResponse {
     status: "success" | "failure" | "not found";
+    reason?: {
+        code: number;
+        description: string;
+    };
     items: Array<Rule>;
 }
 
 export interface BlipGetPrioritiesResponse {
     status: "success" | "failure" | "not found";
+    reason?: {
+        code: number;
+        description: string;
+    };
     items: Array<Priority>;
 }
 
 export interface BlipGetAttendantsResponse {
     status: "success" | "failure" | "not found";
+    reason?: {
+        code: number;
+        description: string;
+    };
     items: Array<Attendant>;
 }
 
 export interface BlipGetTagsResponse {
     status: "success" | "failure" | "not found";
+    reason?: {
+        code: number;
+        description: string;
+    };
     items: Array<string>;
 }
 
 export interface BlipGetCustomRepliesResponse {
     status: "success" | "failure" | "not found";
+    reason?: {
+        code: number;
+        description: string;
+    };
     items: Array<CustomReply>;
 }
 
 export interface BlipGetCustomReplyCategoryResponse {
     status: "success" | "failure" | "not found";
+    reason?: {
+        code: number;
+        description: string;
+    };
     items: Array<Category>;
 }
 

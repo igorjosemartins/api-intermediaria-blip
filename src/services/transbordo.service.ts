@@ -108,7 +108,7 @@ const migrateQueuesAndPriorities = async (destiny: TransbordoAuthSchema, queues:
 
         if (queueData.status != "success") {
             result["queues"]["failure"] += 1;
-            result["queues"]["failedCreations"].push({ status: queueData.status, queue });
+            result["queues"]["failedCreations"].push({ status: queueData.status, reason: queueData.reason, queue });
             continue;
         }
 
@@ -122,7 +122,7 @@ const migrateQueuesAndPriorities = async (destiny: TransbordoAuthSchema, queues:
 
             if (priorityData.status != "success") {
                 result["priorities"]["failure"] += 1;
-                result["priorities"]["failedCreations"].push({ status: priorityData.status, priority: queue.priorityObject });
+                result["priorities"]["failedCreations"].push({ status: priorityData.status, reason: priorityData.reason, priority: queue.priorityObject });
                 continue;
             }
 
@@ -153,7 +153,7 @@ const migrateRules = async (destiny: TransbordoAuthSchema, rules: BlipGetRulesRe
 
         if (ruleData.status != "success") {
             result["rules"]["failure"] += 1;
-            result["rules"]["failedCreations"].push({ status: ruleData.status, rule });
+            result["rules"]["failedCreations"].push({ status: ruleData.status, reason: ruleData.reason, rule });
             continue;
         }
 
@@ -192,7 +192,7 @@ const migrateAttendants = async (destiny: TransbordoAuthSchema, originAttendants
 
         if (attendantData.status != "success") {
             result["attendants"]["failure"] += 1;
-            result["attendants"]["failedCreations"].push({ status: attendantData.status, attendant });
+            result["attendants"]["failedCreations"].push({ status: attendantData.status, reason: attendantData.reason, attendant });
             continue;
         }
 
@@ -205,7 +205,7 @@ const migrateAttendants = async (destiny: TransbordoAuthSchema, originAttendants
 
         if (attendantData.status != "success") {
             result["attendants"]["failure"] += 1;
-            result["attendants"]["failedUpdates"].push({ status: attendantData.status, attendant });
+            result["attendants"]["failedUpdates"].push({ status: attendantData.status, reason: attendantData.reason, attendant });
             continue;
         }
 
@@ -330,7 +330,7 @@ export const attendantsDeletion = async (tenantId: string, httpKey: string) => {
 
         if (deleteData.status != "success") {
             result["attendants"]["failure"] += 1;
-            result["attendants"]["failedDeletes"].push({ status: deleteData.status, attendant });
+            result["attendants"]["failedDeletes"].push({ status: deleteData.status, reason: deleteData.reason, attendant });
             continue;
         }
 
@@ -360,7 +360,7 @@ export const prioritiesDeletion = async (tenantId: string, httpKey: string) => {
 
         if (deleteData.status != "success") {
             result["priorities"]["failure"] += 1;
-            result["priorities"]["failedDeletes"].push({ status: deleteData.status, priority });
+            result["priorities"]["failedDeletes"].push({ status: deleteData.status, reason: deleteData.reason, priority });
             continue;
         }
 
@@ -390,7 +390,7 @@ export const rulesDeletion = async (tenantId: string, httpKey: string) => {
 
         if (deleteData.status != "success") {
             result["rules"]["failure"] += 1;
-            result["rules"]["failedDeletes"].push({ status: deleteData.status, rule });
+            result["rules"]["failedDeletes"].push({ status: deleteData.status, reason: deleteData.reason, rule });
             continue;
         }
 
@@ -422,7 +422,7 @@ export const queuesDeletion = async (tenantId: string, httpKey: string) => {
 
         if (deleteData.status != "success") {
             result["queues"]["failure"] += 1;
-            result["queues"]["failedDeletes"].push({ status: deleteData.status, queue });
+            result["queues"]["failedDeletes"].push({ status: deleteData.status, reason: deleteData.reason, queue });
             continue;
         }
 
@@ -452,7 +452,7 @@ export const repliesDeletion = async (tenantId: string, httpKey: string) => {
 
         if (deleteData.status != "success") {
             result["replies"]["failure"] += 1;
-            result["replies"]["failedDeletes"].push({ status: deleteData.status, reply });
+            result["replies"]["failedDeletes"].push({ status: deleteData.status, reason: deleteData.reason, reply });
             continue;
         }
 
