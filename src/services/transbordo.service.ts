@@ -296,11 +296,11 @@ const migrateCustomReplies = async (origin: TransbordoAuthSchema, destiny: Trans
 };
 
 export const transbordoDeletion = async (tenantId: string, httpKey: string) => {
-    const attendantsDeleteResult = await deleteAttendants(tenantId, httpKey);
-    const prioritiesDeleteResult = await deletePriorities(tenantId, httpKey);
-    const rulesDeleteResult = await deleteRules(tenantId, httpKey);
-    const queuesDeleteResult = await deleteQueues(tenantId, httpKey);
-    const repliesDeleteResult = await deleteReplies(tenantId, httpKey);
+    const attendantsDeleteResult = await attendantsDeletion(tenantId, httpKey);
+    const prioritiesDeleteResult = await prioritiesDeletion(tenantId, httpKey);
+    const rulesDeleteResult = await rulesDeletion(tenantId, httpKey);
+    const queuesDeleteResult = await queuesDeletion(tenantId, httpKey);
+    const repliesDeleteResult = await repliesDeletion(tenantId, httpKey);
 
     return {
         ...attendantsDeleteResult,
@@ -311,7 +311,7 @@ export const transbordoDeletion = async (tenantId: string, httpKey: string) => {
     };
 };
 
-const deleteAttendants = async (tenantId: string, httpKey: string) => {
+export const attendantsDeletion = async (tenantId: string, httpKey: string) => {
     const attendants = await getAttendants(tenantId, httpKey);
 
     let result: any = {
@@ -341,7 +341,7 @@ const deleteAttendants = async (tenantId: string, httpKey: string) => {
     return result;
 };
 
-const deletePriorities = async (tenantId: string, httpKey: string) => {
+export const prioritiesDeletion = async (tenantId: string, httpKey: string) => {
     const priorities = await getAttendancePriorities(tenantId, httpKey);
 
     let result: any = {
@@ -371,7 +371,7 @@ const deletePriorities = async (tenantId: string, httpKey: string) => {
     return result;
 };
 
-const deleteRules = async (tenantId: string, httpKey: string) => {
+export const rulesDeletion = async (tenantId: string, httpKey: string) => {
     const rules = await getAttendanceRules(tenantId, httpKey);
 
     let result: any = {
@@ -401,7 +401,7 @@ const deleteRules = async (tenantId: string, httpKey: string) => {
     return result;
 };
 
-const deleteQueues = async (tenantId: string, httpKey: string) => {
+export const queuesDeletion = async (tenantId: string, httpKey: string) => {
     const queues = await getAttendanceQueues(tenantId, httpKey);
 
     let result: any = {
@@ -433,7 +433,7 @@ const deleteQueues = async (tenantId: string, httpKey: string) => {
     return result;
 };
 
-const deleteReplies = async (tenantId: string, httpKey: string) => {
+export const repliesDeletion = async (tenantId: string, httpKey: string) => {
     const replies = await getCustomReplies(tenantId, httpKey);
 
     let result: any = {

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { deleteTransbordo, migrateAttendants, migrateReplies, migrateTags, migrateTransbordo } from "../controllers/transbordo.controller";
+import { deleteAttendants, deleteQueuePriorities, deleteQueueRules, deleteReplies, deleteTransbordo, migrateAttendants, migrateReplies, migrateTags, migrateTransbordo } from "../controllers/transbordo.controller";
 
 export default async function transbordoRoutes(app: FastifyInstance) {
   app.register(migrationRoutes, { prefix: "/migrate" });
@@ -15,4 +15,8 @@ async function migrationRoutes(app: FastifyInstance) {
 
 async function deleteRoutes(app: FastifyInstance) {
   app.delete("/all", deleteTransbordo);
+  app.delete("/attendants", deleteAttendants);
+  app.delete("/queue-priorities", deleteQueuePriorities);
+  app.delete("/queue-rules", deleteQueueRules);
+  app.delete("/replies", deleteReplies);
 }
