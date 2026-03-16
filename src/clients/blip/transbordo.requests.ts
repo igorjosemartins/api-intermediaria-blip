@@ -21,7 +21,7 @@ export const getAttendanceQueues = async (tenantId: string, authKey: string): Pr
 
         const { data } = await blip.post("", requestBody);
 
-        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description)) return { status: "not found", items: [] };
 
         return {
             status: data.status,
@@ -46,7 +46,7 @@ export const getAttendanceRules = async (tenantId: string, authKey: string): Pro
 
         const { data } = await blip.post("", requestBody);
 
-        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description)) return { status: "not found", items: [] };
 
         return {
             status: data.status,
@@ -71,7 +71,7 @@ export const getAttendancePriorities = async (tenantId: string, authKey: string)
 
         const { data } = await blip.post("", requestBody);
 
-        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description)) return { status: "not found", items: [] };
 
         return {
             status: data.status,
@@ -189,7 +189,7 @@ export const getAttendants = async (tenantId: string, authKey: string): Promise<
 
         const { data } = await blip.post("", requestBody);
 
-        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description)) return { status: "not found", items: [] };
 
         return {
             status: data.status,
@@ -240,7 +240,7 @@ export const getTags = async (tenantId: string, authKey: string): Promise<BlipGe
 
         const { data } = await blip.post("", requestBody);
 
-        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description)) return { status: "not found", items: [] };
 
         return {
             status: data.status,
@@ -265,7 +265,7 @@ export const getCustomReplies = async (tenantId: string, authKey: string): Promi
 
         const { data } = await blip.post("", requestBody);
 
-        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description)) return { status: "not found", items: [] };
 
         return {
             status: data.status,
@@ -290,7 +290,7 @@ export const getCustomReplyCategory = async (tenantId: string, authKey: string, 
 
         const { data } = await blip.post("", requestBody);
 
-        if (data.reason && /no(t)?.*found/gim.test(data.reason.description.includes)) return { status: "not found", items: [] };
+        if (data.reason && /no(t)?.*found/gim.test(data.reason.description)) return { status: "not found", items: [] };
 
         return {
             status: data.status,
