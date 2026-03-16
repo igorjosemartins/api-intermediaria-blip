@@ -152,7 +152,7 @@ export const createAttendancePriority = async (tenantId: string, authKey: string
             id: crypto.randomUUID(),
             to: "postmaster@desk.msging.net",
             method: "set",
-            uri: "/rules",
+            uri: "/priority-rules",
             type: "application/vnd.iris.desk.rule+json",
             resource: {
                 ownerIdentity,
