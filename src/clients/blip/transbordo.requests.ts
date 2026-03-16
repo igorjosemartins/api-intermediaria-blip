@@ -87,6 +87,7 @@ export const createAttendanceQueue = async (tenantId: string, authKey: string, o
     try {
         const blip = transbordoRequest(tenantId, authKey);
         const { name, isActive, Priority } = queue;
+        const botIdentity = `${ownerIdentity}@msging.net`;
 
         const requestBody = {
             id: crypto.randomUUID(),
@@ -95,7 +96,7 @@ export const createAttendanceQueue = async (tenantId: string, authKey: string, o
             uri: "/attendance-queues",
             type: "application/vnd.iris.desk.attendancequeue+json",
             resource: {
-                ownerIdentity,
+                ownerIdentity: botIdentity,
                 name,
                 isActive,
                 Priority
@@ -147,15 +148,16 @@ export const createAttendancePriority = async (tenantId: string, authKey: string
     try {
         const blip = transbordoRequest(tenantId, authKey);
         const { title, isActive, conditions, operator, priority, urgency } = attendancePriority;
+        const botIdentity = `${ownerIdentity}@msging.net`;
 
         const requestBody = {
             id: crypto.randomUUID(),
             to: "postmaster@desk.msging.net",
             method: "set",
             uri: "/priority-rules",
-            type: "application/vnd.iris.desk.rule+json",
+            type: "application/vnd.iris.desk.priority-rules+json",
             resource: {
-                ownerIdentity,
+                ownerIdentity: botIdentity,
                 queueId,
                 id: crypto.randomUUID(),
                 title,
