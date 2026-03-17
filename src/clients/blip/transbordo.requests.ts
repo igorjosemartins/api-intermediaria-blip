@@ -41,7 +41,7 @@ export const getAttendanceRules = async (tenantId: string, authKey: string): Pro
             id: crypto.randomUUID(),
             to: "postmaster@desk.msging.net",
             method: "get",
-            uri: "/rules"
+            uri: "/rules?$take=999"
         };
 
         const { data } = await blip.post("", requestBody);
@@ -66,7 +66,7 @@ export const getAttendancePriorities = async (tenantId: string, authKey: string)
             id: crypto.randomUUID(),
             to: "postmaster@desk.msging.net",
             method: "get",
-            uri: "/priority-rules"
+            uri: "/priority-rules?$take=999"
         };
 
         const { data } = await blip.post("", requestBody);
@@ -186,7 +186,7 @@ export const getAttendants = async (tenantId: string, authKey: string): Promise<
             id: crypto.randomUUID(),
             to: "postmaster@desk.msging.net",
             method: "get",
-            uri: "/attendants"
+            uri: "/attendants?$take=999"
         };
 
         const { data } = await blip.post("", requestBody);
@@ -262,7 +262,7 @@ export const getCustomReplies = async (tenantId: string, authKey: string): Promi
             id: crypto.randomUUID(),
             to: "postmaster@desk.msging.net",
             method: "get",
-            uri: "/replies"
+            uri: "/replies?$take=999"
         };
 
         const { data } = await blip.post("", requestBody);
