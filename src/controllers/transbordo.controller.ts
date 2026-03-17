@@ -12,6 +12,7 @@ import {
   transbordoDeletion,
   transbordoMigration
 } from "../services/transbordo.service";
+import { getAttendanceQueues } from "../clients/blip/transbordo.requests";
 
 export const migrateTransbordo = async (req: FastifyRequest, reply: FastifyReply) => {
   const zodResult = transbordoSchema.safeParse(req.body);
@@ -176,6 +177,25 @@ export const deleteReplies = async (req: FastifyRequest, reply: FastifyReply) =>
 
   try {
     const results = await repliesDeletion(tenantId, httpKey);
+    
+    return reply.status(200).send(results);
+
+  } catch (e) {
+    return reply.status(500).send({ error: (e as Error).message });
+  }
+};
+
+export const getQueues = async (req: FastifyRequest, reply: FastifyReply) => {
+  const zodResult = transbordoAuthSchema.safeParse(req.query);
+
+  if (!zodResult.success) {
+    return reply.status(400).send({ error: z.prettifyError(zodResult.error) });
+  }
+
+  const { tenantId, httpKey } = zodResult.data;
+
+  try {
+    const results = await getAttendanceQueues(tenantId, httpKey);
     
     return reply.status(200).send(results);
 
