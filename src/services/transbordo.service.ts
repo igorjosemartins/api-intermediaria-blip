@@ -57,12 +57,16 @@ export const getMissingTags = async (origin: TransbordoAuthSchema, destiny: Tran
 
     const missingArray = originTags.items.filter(tag => !destinyTags.items.includes(tag));
 
+    // const filteredArray = originTags.items.filter(tag => !tag.toLowerCase().includes("transf"));
+
     let result: any = {
         tags: {
             blipOriginStatus: originTags.status,
             blipDestinyStatus: destinyTags.status,
             missingText: missingArray.join(", "),
-            missingArray
+            missingArray,
+            // filteredText: filteredArray.join(", "),
+            // filteredArray
         }
     };
 
@@ -270,24 +274,24 @@ const migrateCustomReplies = async (origin: TransbordoAuthSchema, destiny: Trans
         const categoryData = await getCustomReplyCategory(origin.tenantId, origin.httpKey, reply.id);
 
         const createdCategory = await createCustomReplyCategory(destiny.tenantId, destiny.httpKey, reply.id, categoryData.items);
-        
+
         let categoryResult: any = {
             blipStatus: createdCategory.status,
             createdCategories: [],
             failedCreations: []
         };
-        
+
         if (createdCategory.status != "success") {
             categoryResult["failedCreations"].push(...categoryData.items);
-            
+
             result["replies"]["failure"] += 1;
             result["replies"]["failedCreations"][reply.category] = categoryResult;
-            
+
             continue;
         }
-        
+
         categoryResult["createdCategories"].push(...categoryData.items);
-        
+
         result["replies"]["success"] += 1;
         result["replies"]["createdReplies"][reply.category] = categoryResult;
     }
@@ -417,7 +421,7 @@ export const queuesDeletion = async (tenantId: string, httpKey: string) => {
 
     for (const queue of queues.items) {
         if (queue.name == "Default") continue;
-        
+
         const deleteData = await deleteAttendanceQueue(tenantId, httpKey, queue.id);
 
         if (deleteData.status != "success") {
