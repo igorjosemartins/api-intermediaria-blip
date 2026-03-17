@@ -16,7 +16,7 @@ export const getAttendanceQueues = async (tenantId: string, authKey: string): Pr
             id: crypto.randomUUID(),
             method: "get",
             to: "postmaster@desk.msging.net",
-            uri: "/attendance-queues"
+            uri: "/attendance-queues?$take=999"
         };
 
         const { data } = await blip.post("", requestBody);
