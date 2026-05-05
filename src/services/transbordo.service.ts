@@ -57,7 +57,7 @@ export const getMissingTags = async (origin: TransbordoAuthSchema, destiny: Tran
 
     const missingArray = originTags.items.filter(tag => !destinyTags.items.includes(tag));
 
-    // const filteredArray = originTags.items.filter(tag => !tag.toLowerCase().includes("transf"));
+    const filteredArray = originTags.items.filter(tag => !tag.toLowerCase().includes("transf"));
 
     let result: any = {
         tags: {
@@ -65,8 +65,8 @@ export const getMissingTags = async (origin: TransbordoAuthSchema, destiny: Tran
             blipDestinyStatus: destinyTags.status,
             missingText: missingArray.join(", "),
             missingArray,
-            // filteredText: filteredArray.join(", "),
-            // filteredArray
+            filteredText: filteredArray.join(", "),
+            filteredArray
         }
     };
 
