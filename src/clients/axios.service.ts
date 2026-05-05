@@ -14,3 +14,10 @@ export const transbordoRequest = (tenantId: string, authKey: string) => axios.cr
         Authorization: authKey
     }
 });
+
+export const createHttpBlipClient = (tenantId: string, authKey: string) => axios.create({
+    baseURL: `https://${tenantId}.http.msging.net/commands`,
+    headers: {
+        Authorization: authKey
+    }
+});
